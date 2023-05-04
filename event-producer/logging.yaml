@@ -1,0 +1,19 @@
+formatters:
+  thread_info_formatter:
+    format: "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: thread_info_formatter
+    level: DEBUG
+    stream: ext://sys.stdout
+  file:
+    class : logging.handlers.RotatingFileHandler
+    formatter: thread_info_formatter
+    level: DEBUG
+    filename: monitoring-service.log
+
+root:
+  level: DEBUG
+  handlers: [console, file]
