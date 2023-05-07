@@ -4,4 +4,5 @@ FROM openjdk:11
 WORKDIR /consumer-service
 COPY target/java-consumer-1.0-SNAPSHOT-jar-with-dependencies.jar .
 ENV LOCAL_INTERFACE=$LOCAL_INTERFACE
+ENV KAFKA_CONNECT_STRING=$KAFKA_CONNECT_STRING
 ENTRYPOINT ["java", "-jar", "java-consumer-1.0-SNAPSHOT-jar-with-dependencies.jar"]

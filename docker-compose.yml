@@ -7,6 +7,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
 
   broker:
     image: confluentinc/cp-kafka:7.3.0
@@ -14,17 +16,45 @@ services:
     ports:
       # To learn about configuring Kafka for access across networks see
       # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
-      - "9092:9092"
+      - 9092:9092
+      - 29092:29092
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  kafka-topics-generator:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      - broker
+    command: >
+      bash -c
+        "sleep 5s &&
+        kafka-topics --create --topic=telemetry-topic --if-not-exists --bootstrap-server=broker:29092"
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:latest
+    hostname: control-center
+    depends_on:
+      - broker
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      PORT: 9021
+
+  kafkacat:
+    image: confluentinc/cp-kafkacat
+    platform: linux/amd64
+    command: sleep infinity
 
   db:
     image: postgres:14.1-alpine
@@ -53,6 +83,7 @@ services:
   kafkaconsumer:
     environment:
       - LOCAL_INTERFACE=${LOCAL_INTERFACE:-host.docker.internal}
+      - KAFKA_CONNECT_STRING=${KAFKA_CONNECT_STRING:-broker:29092}
     build:
       context: ./java-consumer
       dockerfile: ../java-consumer/consumer.dockerfile
