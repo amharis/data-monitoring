@@ -1,4 +1,5 @@
 import logging
+import sys
 import time, datetime
 import traceback
 
@@ -20,20 +21,20 @@ class Producer:
     """
     Model class for
 
-    - Running monitoring jobs
+    - Running event production jobs
     - Publishing results to kafka topic
 
-    The monitoring job is run in a background daemon with threadpool of its own.
+    The event producing bot is run in a background daemon with threadpool of its own.
     Attributes
     ----------
     config_section : config_section
         dictionary containing necessary properties for connecting to Kafka cluster
-    monitoring_jobs : list[Job]
-        list of Job objects, to be periodically monitored
-    duration_seconds : int
-        interval between monitoring runs (in secs)
-    kafka_producer : KafkaProducer
-        client for writing messages to kafka
+    devices : int
+        number of devices between 1-5
+    event_count : int
+        number of events to produce
+    interval_seconds : KafkaProducer
+        interval between event generation
 
     Methods
     -------
@@ -52,8 +53,6 @@ class Producer:
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
 
-    # An alternative here is to use the outbox pattern.
-    # However, this depends on how critical the events are.
     def send_to_kafka(self, events):
         try:
             for e in events:
@@ -77,10 +76,11 @@ class Producer:
         events = []
 
         for device in range(1,self.devices+1):
-            if self.event_count:
+            if self.event_count != None:
                 if self.event_count < 1:
-                    print(f"Count {self.event_count} achieved, exiting program !")
-                    exit()
+                    logger.info(f"Count {self.event_count} achieved, exiting program !")
+                    self.close_producer()
+                    sys.exit()
 
                 self.event_count -= 1
 
@@ -92,7 +92,7 @@ class Producer:
             }
             events.append(e)
 
-
+        logger.debug(f"Event count: {self.event_count}")
         logger.debug(f"Events: {events}")
         self.send_to_kafka(events)
         return events

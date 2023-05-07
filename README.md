@@ -41,6 +41,7 @@ It is run as a docker container, configuration is setup in provided docker-compo
 - `source .venv/bin/activate`
 - `pip3 install -r requirements.txt`
 - `python3 app.py -cf config.ini`
+- `python3 app.py -cf config.ini --devices 2 --interval 6 --event-count 20`
 
 ### Real time monitoring using Grafana
 - In browser, go to `localhost:3000`, and open dashboard "General -> Monitoring service dashboard"
@@ -56,8 +57,6 @@ Following resources were consulted during the course of development
 - https://towardsdatascience.com/how-to-build-a-simple-kafka-producer-and-consumer-with-python-a967769c4742
 - https://www.confluent.io/blog/kafka-listeners-explained/
 - https://github.com/dpkp/kafka-python
-- https://www.psycopg.org/docs/cursor.html
-- https://superfastpython.com/threadpoolexecutor-in-python/
 - https://medium.com/analytics-vidhya/grafana-with-postgresql-data-visualization-with-open-source-tool-36f5150fa290
 - https://grafana.com/docs/grafana/latest/datasources/
 - https://stackoverflow.com/questions/26598738/how-to-create-user-database-in-script-for-docker-postgres

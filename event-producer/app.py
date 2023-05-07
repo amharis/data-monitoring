@@ -1,21 +1,15 @@
 #!/usr/bin/python
 import argparse
-import json
-import os
 from configparser import ConfigParser
 
-import jsonschema
 import atexit
 import logging
 import time
 import yaml
 import logging.config
 
-
 from producer.producer import Producer
 
-
-POSTGRES_CONFIG_SECTION="postgresql"
 KAFKA_CONFIG_SECTION="kafka"
 CONSUMER_POLL_INTERVAL_SECS="consumer_poll_interval_secs"
 
@@ -53,7 +47,6 @@ def parse_config(file: str):
     parser.read(file)
     return parser
 
-# https://www.postgresqltutorial.com/postgresql-python/connect/
 def get_config_section(args, section_name: str) -> {str, str}:
     # parse conf for postgres and kafka integrations
     config_parser = parse_config(args.conf_file)
@@ -72,7 +65,7 @@ def init_application(args, kafka_config, devices, interval_seconds, event_count)
     producer = Producer(kafka_config, devices=devices, interval_seconds=interval_seconds, event_count=event_count)
 
     producer.setup_producer()
-    producer.start_producing()
+    #producer.start_producing()
 
     return producer
 
@@ -103,9 +96,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-cf", "--conf-file", help="location of config for Kafka cluster")
-    parser.add_argument("-i", "--interval", type=int, default=5, help="interval in secs between event generation")
-    parser.add_argument("-d", "--devices", type=int, default=5, help="number of devices")
-    parser.add_argument("-n", "--event-count", type=int, default=None, help="number of events to produce")
+    parser.add_argument("-i", "--interval", type=int, default=5, choices=range(5,11), help="interval in secs between event generation (5-10)")
+    parser.add_argument("-d", "--devices", type=int, default=5, choices=range(1,6),help="number of devices (1-5)")
+    parser.add_argument("-n", "--event-count", type=int, default=None, help="number of events to produce, default is unlimited")
     args = parser.parse_args()
 
     print(f"args: {args}")
@@ -117,6 +110,6 @@ if __name__ == "__main__":
 
     atexit.register(cleanup, producer)
     while True:
-        logging.debug("main thread heart beart")
-        time.sleep(30)
+        producer.produce_events()
+        time.sleep(args.interval)
 
