@@ -27,7 +27,29 @@ It is run as a docker container, configuration is setup in provided docker-compo
 
 
 ## Dependencies
-**Note:** the setup has been tested on MacOS with python3, docker(compose)
+**Note:** the setup has been tested on MacOS with python3, docker(compose). It needs both these technologies to be run.
+
+## Run instructions
+
+### Setup service mesh
+- Checkout repo
+- from root directory, run `docker-compose up -d`
+
+### Run event producer
+- cd to `{project root}/event-producer`
+- `python3 -m venv .venv` # create a virtualenv
+- `source .venv/bin/activate`
+- `pip3 install -r requirements.txt`
+- `python3 app.py -cf config.ini`
+
+### Real time monitoring using Grafana
+- In browser, go to `localhost:3000`, and open dashboard "General -> Monitoring service dashboard"
+
+### Debugging
+- Open Confluent control center at `localhost:9021`, this tool provides visibility into topic operations such as message
+publishing and consumption etc
+![Confluent Control center](doc/confluent-control-center.png)
+- Check logs using `docker-compose logs -f`
 
 ## Attributions
 Following resources were consulted during the course of development
