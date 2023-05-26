@@ -1,4 +1,4 @@
-# Airtainer Monitoring Service
+# Monitoring Service
 
 Airtainer Monitoring service collects telemetry data from a bot python producer, routes it through Kafka and a java 
 consumer client and persists it in PostGres database. Finally there is grafana dashboard enabling real time monitoring.
